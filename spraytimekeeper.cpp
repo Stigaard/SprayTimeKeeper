@@ -38,10 +38,11 @@ SprayTimeKeeper::SprayTimeKeeper(QObject* parent, NozzleControl* nz): QObject(pa
   {
     //SprayTimeKeeperSchedule sched;
     schedule->append(new SprayTimeKeeperSchedule);
-    schedule->at(i)->setNozzleID(i);
-    connect((this->schedule->at(i)), SIGNAL(spray(quint8,bool)), this->nozzlecontrol, SLOT(spray(quint8,bool)));
+    (*schedule)[i]->setNozzleID(i);
+    connect(((*schedule)[i]), SIGNAL(spray(quint8,bool)), this->nozzlecontrol, SLOT(spray(quint8,bool)));
   }
   requests = new QVector< QVector<sprayTimeKeeperRequest*> >(numNozzles);
+  std::cout << "Completed constructor" << std::endl;
 }
 
 void SprayTimeKeeper::Spray(int NozzleID, qint64 startTime, qint64 endTime)
@@ -67,14 +68,14 @@ void SprayTimeKeeper::Spray(int NozzleID, qint64 startTime, qint64 endTime)
     return;
   }
   
-  schedule->at(NozzleID)->lock.lock();
+  (*schedule)[NozzleID]->lock.lock();
   /* Check interference with earlier request, and remove them if this is the case */
-  if(!requests[NozzleID].empty())
+  if(!(*requests)[NozzleID].empty())
   {
-    int cnt = requests->at(NozzleID).count();
+    int cnt = (*requests)[NozzleID].count();
     for(int i=0; i<cnt;)
     {
-      if(requests->at(NozzleID).at(i)->interferes(startTime, endTime))
+      if((*requests)[NozzleID][i]->interferes(startTime, endTime))
       {
 	(*requests)[NozzleID].remove(i);
 	--cnt;
@@ -85,6 +86,6 @@ void SprayTimeKeeper::Spray(int NozzleID, qint64 startTime, qint64 endTime)
   }
   
   /* create new request */
-  (*requests)[NozzleID].push_back(new sprayTimeKeeperRequest(startTime, endTime, *schedule->at(NozzleID)));
-  schedule->at(NozzleID)->lock.unlock();
+  (*requests)[NozzleID].push_back(new sprayTimeKeeperRequest(startTime, endTime, *((*schedule)[NozzleID])));
+  (*schedule)[NozzleID]->lock.unlock();
 }

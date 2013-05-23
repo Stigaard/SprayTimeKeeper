@@ -29,6 +29,7 @@
 #include "spraytimekeeperschedule.h"
 #include <QDateTime>
 #include "spraytimekeeperschedule.moc"
+#include <iostream>
 
 SprayTimeKeeperSchedule::SprayTimeKeeperSchedule(QObject* parent): QThread(parent)
 {
@@ -55,18 +56,29 @@ void SprayTimeKeeperSchedule::run()
 {
   while(true)
   {
+    qint64 sleepTime = 500;
     this->lock.lock();
+    if(this->actions.isEmpty())
+    {
+      this->lock.unlock();
+      this->msleep(sleepTime);
+      continue;
+    } 
     qint64 time = QDateTime::currentMSecsSinceEpoch();
     qint64 nextTime = this->actions.begin().key();
-    qint64 waitTime = time - nextTime;
+    qint64 waitTime = (nextTime/1000) - time;
+    std::cout << "time:		" << time << std::endl;
+    std::cout << "nextTime:	" << nextTime/1000 << std::endl;
+    std::cout << "waitTime:	" << waitTime << std::endl;
     if(waitTime < 10)
     {
       bool action = this->actions.take(nextTime);
+      this->lock.unlock();
       emit(spray(nozzleID, action)); 
     }
     else
     {
-      qint64 sleepTime = 100;
+      this->lock.unlock();
       if(waitTime < sleepTime)
 	this->msleep(waitTime-5);
       else
