@@ -30,7 +30,7 @@
 #include "spraytimekeeper.h"
 #include "spraytimekeeper.moc"
 
-SprayTimeKeeper::SprayTimeKeeper(QObject* parent, NozzleControl* nz): QObject(parent)
+SprayTimeKeeper::SprayTimeKeeper(QObject* parent, NozzleControl* nz): QThread(parent)
 {
   this->nozzlecontrol = nz;
   schedule = new QVector<SprayTimeKeeperSchedule*>;
@@ -42,8 +42,34 @@ SprayTimeKeeper::SprayTimeKeeper(QObject* parent, NozzleControl* nz): QObject(pa
     connect(((*schedule)[i]), SIGNAL(spray(quint8,bool)), this->nozzlecontrol, SLOT(spray(quint8,bool)));
   }
   requests = new QVector< QVector<sprayTimeKeeperRequest*> >(numNozzles);
-  std::cout << "Completed constructor" << std::endl;
+  this->start();
 }
+
+void SprayTimeKeeper::run()
+{
+  while(true)
+  {
+    qint64 now = QDateTime::currentMSecsSinceEpoch()*1000;
+    for(int j = 0; j< numNozzles;j++)
+    {
+      this->requestLock[j].lock();
+      int cnt = (*requests)[j].count();
+      for(int i=0; i<cnt;)
+      {
+	if((*requests)[j][i]->getEndTime() < now)
+	{
+	  (*requests)[j].remove(i);
+	  --cnt;
+	}
+	else
+	  i++;
+      }
+      this->requestLock[j].unlock();
+    }
+  }
+  this->msleep(1000);
+}
+
 
 void SprayTimeKeeper::Spray(int NozzleID, qint64 startTime, qint64 endTime)
 {
@@ -69,6 +95,7 @@ void SprayTimeKeeper::Spray(int NozzleID, qint64 startTime, qint64 endTime)
   }
   
   (*schedule)[NozzleID]->lock.lock();
+  this->requestLock[NozzleID].lock();
   /* Check interference with earlier request, and remove them if this is the case */
   if(!(*requests)[NozzleID].empty())
   {
@@ -85,7 +112,9 @@ void SprayTimeKeeper::Spray(int NozzleID, qint64 startTime, qint64 endTime)
     }
   }
   
+  
   /* create new request */
   (*requests)[NozzleID].push_back(new sprayTimeKeeperRequest(startTime, endTime, *((*schedule)[NozzleID])));
+  this->requestLock[NozzleID].unlock();
   (*schedule)[NozzleID]->lock.unlock();
 }

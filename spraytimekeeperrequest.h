@@ -39,6 +39,7 @@ public:
     explicit sprayTimeKeeperRequest(qint64 startTime, qint64 endTime, SprayTimeKeeperSchedule  &schedule);
     virtual ~sprayTimeKeeperRequest();
   bool interferes(qint64 startTime, qint64 endTime);
+  qint64 getEndTime(void);
 private:
   qint64 startTime;
   qint64 endTime;

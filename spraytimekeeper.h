@@ -31,21 +31,24 @@
 
 #include <QObject>
 #include <QVector>
+#include <QMutex>
 #include "spraytimekeeperschedule.h"
 #include "spraytimekeeperrequest.h"
 #include "../../src/nozzlecontrol.h"
 
-class SprayTimeKeeper : public QObject
+class SprayTimeKeeper : public QThread
 {
    Q_OBJECT
 public:
     explicit SprayTimeKeeper(QObject* parent = 0, NozzleControl * nz = NULL);
+    virtual void run();
 public slots:
     void Spray(int NozzleID, qint64 startTime, qint64 endTime);
 private:
     static const int numNozzles = 3;
     QVector<SprayTimeKeeperSchedule*> * schedule;
     QVector< QVector<sprayTimeKeeperRequest*> > * requests;
+    QMutex requestLock[numNozzles];
     NozzleControl * nozzlecontrol;
     
 };

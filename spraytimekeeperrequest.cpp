@@ -36,6 +36,12 @@ bool sprayTimeKeeperRequest::interferes(qint64 startTime, qint64 endTime)
   return startInterference || endInterference;
 }
 
+qint64 sprayTimeKeeperRequest::getEndTime(void )
+{
+  return this->endTime;
+}
+
+
 sprayTimeKeeperRequest::sprayTimeKeeperRequest(qint64 startTime, qint64 endTime, SprayTimeKeeperSchedule& schedule)
 {
   this->startTime = startTime;
