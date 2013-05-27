@@ -67,9 +67,6 @@ void SprayTimeKeeperSchedule::run()
     qint64 time = QDateTime::currentMSecsSinceEpoch();
     qint64 nextTime = this->actions.begin().key();
     qint64 waitTime = (nextTime/1000) - time;
-    std::cout << "time:		" << time << std::endl;
-    std::cout << "nextTime:	" << nextTime/1000 << std::endl;
-    std::cout << "waitTime:	" << waitTime << std::endl;
     if(waitTime < 10)
     {
       bool action = this->actions.take(nextTime);
@@ -78,6 +75,9 @@ void SprayTimeKeeperSchedule::run()
     }
     else
     {
+    std::cout << "time:		" << time << std::endl;
+    std::cout << "nextTime:	" << nextTime/1000 << std::endl;
+    std::cout << "waitTime:	" << waitTime << std::endl;
       this->lock.unlock();
       if(waitTime < sleepTime)
 	this->msleep(waitTime-5);

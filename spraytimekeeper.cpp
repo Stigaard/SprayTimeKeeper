@@ -66,8 +66,8 @@ void SprayTimeKeeper::run()
       }
       this->requestLock[j].unlock();
     }
-  }
-  this->msleep(1000);
+    this->msleep(1000);
+    }
 }
 
 
@@ -91,6 +91,8 @@ void SprayTimeKeeper::Spray(int NozzleID, qint64 startTime, qint64 endTime)
   if(startTime < QDateTime::currentMSecsSinceEpoch()*1000) 
   {
     std::cerr << "Start time lies in the past !" << std::endl;
+    std::cerr << "current time:	" << QDateTime::currentMSecsSinceEpoch()*1000 << std::endl;
+    std::cerr << "Start Time:	" << startTime << std::endl;
     return;
   }
   
