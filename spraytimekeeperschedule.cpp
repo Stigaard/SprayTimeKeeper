@@ -75,9 +75,9 @@ void SprayTimeKeeperSchedule::run()
     }
     else
     {
-    std::cout << "time:		" << time << std::endl;
-    std::cout << "nextTime:	" << nextTime/1000 << std::endl;
-    std::cout << "waitTime:	" << waitTime << std::endl;
+//     std::cout << "time:		" << time << std::endl;
+//     std::cout << "nextTime:	" << nextTime/1000 << std::endl;
+//     std::cout << "waitTime:	" << waitTime << std::endl;
       this->lock.unlock();
       if(waitTime < sleepTime)
 	this->msleep(waitTime-5);

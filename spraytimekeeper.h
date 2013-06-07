@@ -35,6 +35,7 @@
 #include "spraytimekeeperschedule.h"
 #include "spraytimekeeperrequest.h"
 #include "../../src/nozzlecontrol.h"
+#include "../LoggerModule/loggermodule.h"
 
 class SprayTimeKeeper : public QThread
 {
@@ -50,7 +51,7 @@ private:
     QVector< QVector<sprayTimeKeeperRequest*> > * requests;
     QMutex requestLock[numNozzles];
     NozzleControl * nozzlecontrol;
-    
+    LoggerModule * log;
 };
 
 #endif // SPRAYTIMEKEEPER_H
