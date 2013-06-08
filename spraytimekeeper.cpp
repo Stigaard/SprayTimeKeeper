@@ -33,7 +33,9 @@
 SprayTimeKeeper::SprayTimeKeeper(QObject* parent, NozzleControl* nz): QThread(parent)
 {
   this->nozzlecontrol = nz;
+#ifdef USE_DATALOGGER
   this->log = new LoggerModule("../Logging", "SpraytimeCommands");
+#endif
   schedule = new QVector<SprayTimeKeeperSchedule*>;
   for(int i = 0; i<numNozzles; i++)
   {
@@ -74,10 +76,12 @@ void SprayTimeKeeper::run()
 
 void SprayTimeKeeper::Spray(int NozzleID, qint64 startTime, qint64 endTime)
 {
+#ifdef USE_DATALOGGER
   log->log("startTime", QString::number(startTime).toLocal8Bit().constData());
   log->log("endTime", QString::number(endTime).toLocal8Bit().constData());
   log->log("NozzleID", NozzleID);
-  std::cout << "Received request with Starttime:" << startTime << "	endTime:" << endTime << std::endl;
+#endif
+  //std::cout << "Received request with Starttime:" << startTime << "	endTime:" << endTime << std::endl;
   /* Check if nozzleID is valid*/
   if(NozzleID < 0 || NozzleID >= numNozzles)
   {
